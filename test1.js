@@ -1,12 +1,8 @@
-// 1. Test bed runs initializes clients and counts expected steps
-// 2. clients are up and running, they report ready
-// 3. when all clients are ready testbed will start step 0
-// 4. a step will run in one client
-// 5. the client repports back with string '' = ok or an error message
-// 6. testbed will display the errors and passes
-// 7. the test bed will set next step and repeat until all steps have been run.
-// 8. the test bed will clean up clients and remove them from dom.
-// 9. the test bed will start next test.
+/*
+
+  Test to see if tabs syncronize
+
+*/
 
 if (Meteor.isServer) {
   db = new Meteor.Collection('test');
@@ -16,7 +12,7 @@ if (Meteor.isClient) {
   localStorage.clear();
 }
 
-GroundTest.add('Inserts', function() {
+GroundTest.add('Test tab syncronisation', function() {
 
   // Insert iframe 
   var clientA = new this.Client('A');
@@ -26,7 +22,7 @@ GroundTest.add('Inserts', function() {
   var server = new this.Server();
 
   // Step 0
-  server(function(complete) {
+  server('Server removes all data in test collection', function(complete) {
     // Empty test db
     db.remove();
 
@@ -34,7 +30,7 @@ GroundTest.add('Inserts', function() {
   });
 
   // Step 1
-  clientA(function(complete) {
+  clientA('Rig GroundDB Empty and inserts doc', function(complete) {
     db = new GroundDB('test');
 
     db.find({}).forEach(function(doc) {
@@ -47,7 +43,7 @@ GroundTest.add('Inserts', function() {
   });
 
   // step 2
-  clientB(function(complete) {
+  clientB('Rig GroundDB, findOne doc then disconnect', function(complete) {
     db = new GroundDB('test');
 
     var item = db.findOne({});
@@ -62,7 +58,7 @@ GroundTest.add('Inserts', function() {
   });
 
   // Step 3
-  clientA(function(complete) {
+  clientA('findOne doc, update this and wait 1 sec', function(complete) {
 
     var item = db.findOne({});
 
@@ -76,7 +72,7 @@ GroundTest.add('Inserts', function() {
 
 
   // step 4
-  clientB(function(complete) {
+  clientB('check offline, then check if tab sync works', function(complete) {
     var connection = Meteor.connection.status();
 
     if (connection.status == 'connected') {
