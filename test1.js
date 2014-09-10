@@ -4,13 +4,7 @@
 
 */
 
-if (Meteor.isServer) {
-  db = new Meteor.Collection('test');
-}
 
-if (Meteor.isClient) {
-  localStorage.clear();
-}
 
 GroundTest.add('Test tab syncronisation', function() {
 
@@ -38,8 +32,13 @@ GroundTest.add('Test tab syncronisation', function() {
     });
 
     db.insert({ foo: 'bar' }, function(err) {
-      complete();
+      if (err) {
+        complete('Got error while inserting data, Error:' + err.message);
+      } else {
+        complete();
+      }
     });
+
   });
 
   // step 2
@@ -50,10 +49,15 @@ GroundTest.add('Test tab syncronisation', function() {
 
     Meteor.disconnect();
 
-    if (!item || item.foo !== 'bar')
-      complete('Could not find item with foo==bar')
-    else
-      complete();
+    if (!item) {
+      complete('could not find any items...');
+    } else {
+
+      if (item.foo !== 'bar')
+        complete('Could not find item with foo==bar, got: "' + item.foo + '"')
+      else
+        complete();
+    }
 
   });
 

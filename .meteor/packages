@@ -8,3 +8,4 @@ autopublish
 insecure
 ground:test
 ground:db
+ground:minimax
