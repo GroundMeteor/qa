@@ -14,9 +14,9 @@ deps@1.0.2
 ejson@1.0.1
 follower-livedata@1.0.1
 geojson-utils@1.0.0
-ground:db@0.1.3
+ground:db@0.0.1
 ground:dictionary@0.0.0
-ground:minimax@0.0.9
+ground:minimax@0.0.1
 ground:test@0.1.4
 html-tools@1.0.0
 htmljs@1.0.0
