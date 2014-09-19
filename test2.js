@@ -14,6 +14,7 @@ GroundTest.add('Test common online insert/update/remove', function() {
 
   // Step 0
   server('Clean db', function(complete) {
+    console.log('---------------- TEST 2 - CLEAR DB --------------');    
     db.remove({});
     complete();
   });

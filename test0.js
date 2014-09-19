@@ -5,7 +5,22 @@ This file initializes the databases and the test environment
 */
 
 if (Meteor.isServer) {
+  
   db = new Meteor.Collection('test');
+
+  db.remove({});
+
+  db.find().observe({
+    'added': function(doc) {
+      console.log('added', doc);
+    },
+    'changed': function(doc, olddoc) {
+      console.log('changed', doc, olddoc);
+    },
+    'removed': function(doc) {
+      console.log('removed', doc);
+    },
+  });
 }
 
 GroundTest.add('Test environment', function() {
@@ -23,7 +38,7 @@ GroundTest.add('Test environment', function() {
 
   */
   server('Test server environment', function(complete) {
-
+    console.log('---------------- TEST 0 - START --------------');
     
     if (typeof db !== 'undefined') {
       if (db instanceof Meteor.Collection) {
@@ -43,6 +58,7 @@ GroundTest.add('Test environment', function() {
 
   */
   client('Test client environment', function(complete) {
+
     if (typeof GroundDB !== 'function') {
 
       complete('Global "GroundDB" not a function "' + (typeof GroundDB) + '"');
@@ -52,7 +68,7 @@ GroundTest.add('Test environment', function() {
       db = new GroundDB('test');
 
       if (typeof db !== 'undefined') {
-        if (db instanceof Meteor.Collection) {
+        if (db.collection instanceof Meteor.Collection) {
           complete();
         } else {
           complete('could not set db as instance of Meteor.Collection');

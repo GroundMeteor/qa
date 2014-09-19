@@ -26,13 +26,16 @@ GroundTest.add('Test offline resume actions', function() {
   clientA('Clear localStorage', function(complete) {    
     localStorage.clear();
 
-    db = new GroundDB('test', { prefix: 'clienta' });
+    db = new GroundDB('test');
 
     if (db.findOne()) {
       complete('Database is not empty');
     } else {
       complete();
     }
+
+    // All rigged - got an empty db now go offline...
+    Meteor.disconnect();
 
   });
 
@@ -42,32 +45,27 @@ GroundTest.add('Test offline resume actions', function() {
     } else {
       complete();
     }
+    console.log('---------------- TEST 4 - CLEAR DB --------------');
+    console.log('(Note: Server should be silente here...)');
   });  
 
   // Step 1
   clientA('Create document on the client', function(complete) {
 
-    // All rigged - got an empty db now go offline...
-    Meteor.disconnect();
-
-    // Check the prefex
-    if (db.prefix === 'clienta') {
       
-      db.insert({ test: 1, foo: 'test_new_document', bar: 'online' }); // create
-      db.insert({ test: 2, foo: 'test_new_document', bar: 'online' }); // update
-      db.insert({ test: 3, foo: 'test_new_document', bar: 'online' }); // remove
+    db.insert({ test: 1, foo: 'test_new_document', bar: 'online' }); // create
+    db.insert({ test: 2, foo: 'test_new_document', bar: 'online' }); // update
+    db.insert({ test: 3, foo: 'test_new_document', bar: 'online' }); // remove
 
-      complete();
-
-    } else {
-      complete('Could not prefix database');
-    }
+    complete();
 
   });
 
   // Step 2
   clientA('Update document on the client', function(complete) {
     var doc = db.findOne({ test: 2 });
+
+    if (!doc) { complete('Document not found...'); return; }
 
     db.update({ _id: doc._id }, { $set: { foo: 'test_update_document' } });
     
@@ -78,9 +76,12 @@ GroundTest.add('Test offline resume actions', function() {
   clientA('Remove document on the client', function(complete) {
     var doc = db.findOne({ test: 3 });
 
+    if (!doc) { complete('Document not found...'); return; }
+
     db.remove({ _id: doc._id });
     
     Meteor.setTimeout(function() {
+      //complete(localStorage.getItem('_storage._methods_.db.methods'));
       complete();
     }, 1000);
 
@@ -88,14 +89,34 @@ GroundTest.add('Test offline resume actions', function() {
 
   // Step 3
   clientA('Close the client', function(complete) {
-    var methods = localStorage.getItem('groundDB.methods');
-    
+
+
+    var _getMethodsList = function() {
+      // Array of outstanding methods
+      var methods = [];
+      // Made a public API to disallow caching of some method calls
+      // Convert the data into nice array
+      _.each(db.connection._methodInvokers, function(method) {
+        // Dont cache login or getServerTime calls - they are spawned pr. default
+        methods.push({
+          // Format the data
+          method: method._message.method,
+          args: method._message.params,
+          options: { wait: method._wait }
+        });
+      });
+      return methods;
+    };
+
+
+    var methods = localStorage.getItem('_storage._methods_.db.methods');
+    var actualMethods = JSON.stringify(_getMethodsList());
     
     if (!methods || methods == '[[false,true,null],[0],[0]]') {
-      complete('Outstanding methods are not stored in localstorage!');
+      complete('Outstanding methods are not stored in localstorage! Got: "' + methods + '" - real: "' + actualMethods + '"');
     } else {
       var operationCount = MiniMax.parse(methods).length;
-      if (operationCount >= 5) {
+      if (operationCount == 5) {
         complete();
       } else {
         complete('Not all Outstanding methods in there');
@@ -112,40 +133,57 @@ GroundTest.add('Test offline resume actions - Verify', function() {
 
   var server = new this.Server();
 
+  server('Init', function(complete) {
+    console.log('---------------- TEST 5 - WATCHING DB --------------');
+    complete();
+  });
+
   // Step 1
-  clientA('Restart client as connected wait 3 sec for sync', function(complete) {
+  clientA('Restart client and wait for resumed methods to return', function(complete) {
 
     // We just made a hard boot of the client - and we pause the connection just
     // a bit to check up on stuff
-    //Meteor.disconnect();
+    var counter = 0;
+    var errors = 0;
 
-    var methodsBefore = localStorage.getItem('groundDB.methods');
-   
+    GroundDB.addListener('method', function(method, err, result) {
+      console.log('Method returned:', JSON.stringify(method));
+      counter++;
+      if (err) errors++;
+      if (counter == 5) {
 
-    if (!methodsBefore || methodsBefore == '[[false,true,null],[0],[0]]') {
-      complete('No methods stored before');
-      return;
-    }
+        if (errors)
+          complete('Methods failed: ' + errors)
+        else
+          complete();
+      }
+    });
+    console.log('LISTENER ADDED');
 
     // Create the grounddb
-    db = new GroundDB('test', { prefix: 'clienta' });
-
-
-    var methodsAfter = localStorage.getItem('groundDB.methods');
-
-    if (!methodsAfter || methodsAfter == '[[false,true,null],[0],[0]]') {
-      complete('After: Outstanding methods are not stored in localstorage!');
-      return;
-    }
-
-    //Meteor.reconnect();
+    db = new GroundDB('test');
 
     Meteor.setTimeout(function() {
+      if (counter < 5) complete('Methods failed ' + counter + ' methods returned');
+    }, 2000);
 
-      complete();
+  });
 
-    }, 5000);
+  // Step 5
+  clientA('Verify created document', function(complete) {
+    var doc = db.findOne({ test: 1 });
 
+    if (doc) {
+      
+      if (doc.foo == 'test_new_document' && doc.bar == 'online') {
+        complete();
+      } else {
+        complete('Document is found but contains invalid data');
+      }
+
+    } else {
+      complete('Could not find any documents matching');
+    }
   });
 
   // Step 5
@@ -165,6 +203,22 @@ GroundTest.add('Test offline resume actions - Verify', function() {
     }
   });
 
+  // Step 7
+  clientA('Verify updated document', function(complete) {
+    var doc = db.findOne({ test: 2 });
+
+    if (doc) {
+      
+      if (doc.foo == 'test_update_document' && doc.bar == 'online') {
+        complete();
+      } else {
+        complete('Document is found but contains invalid data');
+      }
+
+    } else {
+      complete('Could not find any documents matching');
+    }
+  });
 
   // Step 7
   server('Verify updated document', function(complete) {
@@ -185,6 +239,19 @@ GroundTest.add('Test offline resume actions - Verify', function() {
 
 
   // Step 9
+  clientA('Verify removed document', function(complete) {
+    var doc = db.findOne({ test: 3 });
+
+    var count = db.find().count();
+
+    if (doc) {
+      complete('Document not removed ' + count);
+    } else {
+      complete();
+    }
+  });
+
+  // Step 9
   server('Verify removed document', function(complete) {
     var doc = db.findOne({ test: 3 });
 
@@ -196,5 +263,11 @@ GroundTest.add('Test offline resume actions - Verify', function() {
       complete();
     }
   });
+
+  // Step 9
+  clientA('clear localStorage', function(complete) {
+    localStorage.clear();
+    complete();
+  });  
 
 });

@@ -21,6 +21,7 @@ GroundTest.add('Test common offline insert/update/remove', function() {
 
   // Step 0
   server('Clean db', function(complete) {
+    console.log('---------------- TEST 3 - CLEAR DB --------------');    
     db.remove({});
     complete();
   });
@@ -31,9 +32,9 @@ GroundTest.add('Test common offline insert/update/remove', function() {
 
     Meteor.disconnect();
     
-    db = new GroundDB('test', { prefix: 'clienta' });
+    db = new GroundDB('test', { prefix: 'clienta.' });
 
-    if (db.prefix === 'clienta') {
+    if (db.storage.prefix() === '_storage.clienta.test.db.') {
       
       db.insert({ test: 1, foo: 'test_new_document', bar: 'online' }); // create
       db.insert({ test: 2, foo: 'test_new_document', bar: 'online' }); // update
@@ -42,7 +43,7 @@ GroundTest.add('Test common offline insert/update/remove', function() {
       complete();
 
     } else {
-      complete('Could not prefix database');
+      complete('Could not prefix database got: "'+db.storage.prefix() + '"');
     }
 
   });
@@ -50,6 +51,8 @@ GroundTest.add('Test common offline insert/update/remove', function() {
   // Step 2
   clientA('Update document on the client', function(complete) {
     var doc = db.findOne({ test: 2 });
+
+    if (!doc) { complete('Document not found...'); return; }
 
     db.update({ _id: doc._id }, { $set: { foo: 'test_update_document' } });
     
@@ -59,6 +62,8 @@ GroundTest.add('Test common offline insert/update/remove', function() {
   // Step 3
   clientA('Remove document on the client', function(complete) {
     var doc = db.findOne({ test: 3 });
+
+    if (!doc) { complete('Document not found...'); return; }
 
     db.remove({ _id: doc._id });
     

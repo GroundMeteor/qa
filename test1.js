@@ -42,12 +42,12 @@ GroundTest.add('Test tab syncronisation', function() {
   });
 
   // step 2
-  clientB('Rig GroundDB, findOne doc then disconnect', function(complete) {
+  clientB('Disconnect, Rig GroundDB, findOne doc', function(complete) {
+    Meteor.disconnect();
     db = new GroundDB('test');
 
     var item = db.findOne({});
 
-    Meteor.disconnect();
 
     if (!item) {
       complete('could not find any items...');
@@ -67,9 +67,17 @@ GroundTest.add('Test tab syncronisation', function() {
     var item = db.findOne({});
 
     db.update({ _id: item._id }, { foo: 'foo' }, function(err) {
-      Meteor.setTimeout(function() {
-        complete();
-      }, 1000);
+      if (err) {
+
+        complete(err.message);
+
+      } else {
+
+        Meteor.setTimeout(function() {
+          complete();
+        }, 5000);
+
+      }
     });
 
   });
