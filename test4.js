@@ -143,9 +143,11 @@ GroundTest.add('Test offline resume actions - Verify', function() {
 
   var server = new this.Server();
 
-  clientA('Go offline', function(done) {
-    Meteor.disconnect();
-    done();
+  clientA('Wait a sec for methods to resume', function(done) {
+    db = new GroundDB('test');
+    Meteor.setTimeout(function() {
+      done();
+    }, 1000);    
   });
 
   server('Init', function(complete) {
@@ -161,28 +163,26 @@ GroundTest.add('Test offline resume actions - Verify', function() {
     var counter = 0;
     var errors = 0;
 
-    GroundDB.addListener('method', function(method, err, result) {
-      console.log('Method returned:', JSON.stringify(method));
-      counter++;
-      if (err) errors++;
-      if (counter == 5) {
+    var thereIsNoRemainingMethods = function() {
+      var methods = localStorage.getItem('_storage._methods_.db.methods');
 
-        if (errors)
-          complete('Methods failed: ' + errors)
-        else
+      return (!methods || methods == '[[false,true,null],[0],[0]]');
+    };
+
+
+    if (thereIsNoRemainingMethods()) {
+      complete();
+    } else {
+
+      Meteor.setTimeout(function() {
+        if (thereIsNoRemainingMethods()) {
           complete();
-      }
-    });
-    console.log('LISTENER ADDED');
+        } else {
+          complete('There are still remaining methods?');
+        }
+      }, 2000);
 
-    // Create the grounddb
-    db = new GroundDB('test');
-
-    Meteor.reconnect();
-
-    Meteor.setTimeout(function() {
-      if (counter < 5) complete('Methods failed ' + counter + ' methods returned');
-    }, 2000);
+    }
 
   });
 

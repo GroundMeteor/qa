@@ -39,11 +39,15 @@ GroundTest.add('Test tab syncronisation', function() {
       db.remove({ _id: doc._id });
     });
 
-    db.insert({ foo: 'bar' }, function(err) {
+    db.insert({ foo: 'bar' }, function(err, id) {
       if (err) {
         complete('Got error while inserting data, Error:' + err.message);
       } else {
-        complete();
+        if (id) {
+          complete();
+        } else {
+          complete('The insert function did not return an _id');
+        }
       }
     });
 
