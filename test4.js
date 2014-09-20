@@ -19,6 +19,7 @@ GroundTest.add('Test offline resume actions', function() {
 
   // Step 0
   server('Clean db', function(complete) {
+    console.log('---------------- TEST 4 - CLEAR DB --------------');
     db.remove({});
     complete();
   });
@@ -45,7 +46,7 @@ GroundTest.add('Test offline resume actions', function() {
     } else {
       complete();
     }
-    console.log('---------------- TEST 4 - CLEAR DB --------------');
+    console.log('---------------- TEST 4 - CLEARED DB --------------');
     console.log('(Note: Server should be silente here...)');
   });  
 
@@ -53,9 +54,9 @@ GroundTest.add('Test offline resume actions', function() {
   clientA('Create document on the client', function(complete) {
 
       
-    db.insert({ test: 1, foo: 'test_new_document', bar: 'online' }); // create
-    db.insert({ test: 2, foo: 'test_new_document', bar: 'online' }); // update
-    db.insert({ test: 3, foo: 'test_new_document', bar: 'online' }); // remove
+    db.insert({ test: 1, foo: 'test_new_document', bar: 'online', comment: 'TEST 4' }); // create
+    db.insert({ test: 2, foo: 'test_new_document', bar: 'online', comment: 'TEST 4' }); // update
+    db.insert({ test: 3, foo: 'test_new_document', bar: 'online', comment: 'TEST 4' }); // remove
 
     complete();
 
@@ -125,6 +126,15 @@ GroundTest.add('Test offline resume actions', function() {
 
   });
 
+  server('Check clean db', function(complete) {
+    if (db.findOne()) {
+      complete('Database is not empty');
+    } else {
+      complete();
+    }
+    console.log('---------------- TEST 4 - END --------------');
+  }); 
+
 });
 
 
@@ -132,6 +142,11 @@ GroundTest.add('Test offline resume actions - Verify', function() {
   var clientA = new this.Client('A');
 
   var server = new this.Server();
+
+  clientA('Go offline', function(done) {
+    Meteor.disconnect();
+    done();
+  });
 
   server('Init', function(complete) {
     console.log('---------------- TEST 5 - WATCHING DB --------------');
@@ -162,6 +177,8 @@ GroundTest.add('Test offline resume actions - Verify', function() {
 
     // Create the grounddb
     db = new GroundDB('test');
+
+    Meteor.reconnect();
 
     Meteor.setTimeout(function() {
       if (counter < 5) complete('Methods failed ' + counter + ' methods returned');
