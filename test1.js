@@ -2,6 +2,14 @@
 
   Test to see if tabs syncronize
 
+  Client A is online
+
+  Client B is offline
+
+  Changes made on client A should be updated in client B via tab communication
+
+  If B creates data A should send the data for B
+
 */
 
 
@@ -100,5 +108,27 @@ GroundTest.add('Test tab syncronisation', function() {
       complete();
 
   });
+
+  // step 4
+  clientB('make an offline change', function(complete) {
+
+    db.insert({ test: 1, comment: 'Created by offline tab'});
+
+    Meteor.setTimeout(function() {
+      complete();
+    }, 600); // grounddb waits 500ms...
+
+  });
+
+  server('Check to see the offline tab change', function(complete) {
+    console.log('**** SERVER - Check offline data created by B and send by A');
+    var item = db.findOne({ test: 1 });
+
+    if (item) {
+      complete();
+    } else {
+      complete('Could not find the added document');
+    }
+  });  
 
 });
