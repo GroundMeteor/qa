@@ -17,7 +17,7 @@ ejson@1.0.2
 fastclick@1.0.0
 follower-livedata@1.0.1
 geojson-utils@1.0.0
-ground:db@0.0.5
+ground:db@0.0.6
 ground:dictionary@0.0.1
 ground:localstorage@0.0.0
 ground:minimax@0.0.2

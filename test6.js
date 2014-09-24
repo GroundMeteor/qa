@@ -96,7 +96,7 @@ GroundTest.add('Conflict resolution newest doc wins', function() {
         // Let things settle
         Meteor.setTimeout(function() {
           complete();
-        }, 600);
+        }, 1000);
       }
     });
 
@@ -119,6 +119,23 @@ GroundTest.add('Conflict resolution newest doc wins', function() {
     }
   });
 
+  // Step 9
+  server('clear collection', function(complete) {
+    db.remove();
+    complete();
+  }); 
+
+  // Step 9
+  clientA('clear localStorage', function(complete) {
+    localStorage.clear();
+    complete();
+  });
+
+  // Step 9
+  clientB('clear localStorage', function(complete) {
+    localStorage.clear();
+    complete();
+  });    
 
 ////////////////////////////////////////////////////////////////////////////////
 

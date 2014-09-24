@@ -274,11 +274,21 @@ GroundTest.add('Test offline resume actions - Verify', function() {
 
     var count = db.find().count();
 
+    db.remove();
+
     if (doc) {
       complete('Document not removed ' + count);
     } else {
       complete();
     }
+
+  });
+
+  server('Wait 1 sec', function(complete) {
+    Meteor.setTimeout(function() {
+      complete();
+    }, 1000);
+
   });
 
   // Step 9

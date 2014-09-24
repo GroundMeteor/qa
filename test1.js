@@ -23,13 +23,7 @@ GroundTest.add('Test tab syncronisation', function() {
   // Use this server
   var server = new this.Server();
 
-  // Step 0
-  server('Server removes all data in test collection', function(complete) {
-    // Empty test db
-    db.remove();
-
-    complete(); 
-  });
+  TestUtils.clearDatabase(server);
 
   // Step 1
   clientA('Rig GroundDB Empty and inserts doc', function(complete) {
