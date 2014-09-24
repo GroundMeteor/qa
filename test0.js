@@ -21,6 +21,27 @@ if (Meteor.isServer) {
       console.log('removed', doc);
     },
   });
+
+  var allowAll = {
+    insert: function (userId, doc) {
+      // the user must be logged in
+      return true;
+    },
+    update: function (userId, doc, fields, modifier) {
+      // the user must be logged in
+      return true;
+    },
+    remove: function (userId, doc) {
+      // the user must be logged in
+      return true;
+    } 
+  };
+
+  db.allow(allowAll);
+
+} else {
+
+  GroundDB.skipMethods({ 'clientConsoleLog': true });
 }
 
 GroundTest.add('Test environment', function() {
@@ -68,7 +89,7 @@ GroundTest.add('Test environment', function() {
       db = new GroundDB('test');
 
       if (typeof db !== 'undefined') {
-        if (db.collection instanceof Meteor.Collection) {
+        if (db instanceof Meteor.Collection) {
           complete();
         } else {
           complete('could not set db as instance of Meteor.Collection');

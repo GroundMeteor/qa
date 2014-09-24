@@ -97,7 +97,7 @@ GroundTest.add('Test offline resume actions', function() {
       var methods = [];
       // Made a public API to disallow caching of some method calls
       // Convert the data into nice array
-      _.each(db.connection._methodInvokers, function(method) {
+      _.each(db._connection._methodInvokers, function(method) {
         // Dont cache login or getServerTime calls - they are spawned pr. default
         methods.push({
           // Format the data

@@ -34,7 +34,7 @@ GroundTest.add('Test common offline insert/update/remove', function() {
     
     db = new GroundDB('test', { prefix: 'clienta.' });
 
-    if (db.storage.prefix() === '_storage.clienta.test.db.') {
+    if (db.grounddb.storage.prefix() === '_storage.clienta.test.db.') {
       
       db.insert({ test: 1, foo: 'test_new_document', bar: 'online' }); // create
       db.insert({ test: 2, foo: 'test_new_document', bar: 'online' }); // update
@@ -43,7 +43,7 @@ GroundTest.add('Test common offline insert/update/remove', function() {
       complete();
 
     } else {
-      complete('Could not prefix database got: "'+db.storage.prefix() + '"');
+      complete('Could not prefix database got: "'+db.grounddb.storage.prefix() + '"');
     }
 
   });

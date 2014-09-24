@@ -33,22 +33,30 @@ GroundTest.add('Test tab syncronisation', function() {
 
   // Step 1
   clientA('Rig GroundDB Empty and inserts doc', function(complete) {
-    db = new GroundDB('test');
+    Meteor.startup(function() {
 
-    db.find({}).forEach(function(doc) {
-      db.remove({ _id: doc._id });
-    });
+      db = new GroundDB('test');
 
-    db.insert({ foo: 'bar' }, function(err, id) {
-      if (err) {
-        complete('Got error while inserting data, Error:' + err.message);
-      } else {
-        if (id) {
-          complete();
+      db.find({}).forEach(function(doc) {
+        db.remove({ _id: doc._id });
+      });
+
+      db.insert({ foo: 'bar' }, function(err, id) {
+        GroundTest.log('GOT ID:', id);
+      });
+
+      db.insert({ foo: 'bar' }, function(err, id) {
+        if (err) {
+          complete('Got error while inserting data, Error:' + err.message);
         } else {
-          complete('The insert function did not return an _id');
+          if (id) {
+            complete();
+          } else {
+            complete('The insert function did not return an _id');
+          }
         }
-      }
+      });
+
     });
 
   });
@@ -78,7 +86,7 @@ GroundTest.add('Test tab syncronisation', function() {
 
     var item = db.findOne({});
 
-    db.update({ _id: item._id }, { foo: 'foo' }, function(err) {
+    db.update({ _id: item._id }, { $set: { foo: 'foo' } }, function(err) {
       if (err) {
 
         complete(err.message);
