@@ -26,10 +26,10 @@ GroundTest.add('Test tab syncronisation', function() {
   TestUtils.clearDatabase(server);
 
   // Step 1
-  clientA('Rig GroundDB Empty and inserts doc', function(complete) {
+  clientA('Rig Ground Empty and inserts doc', function(complete) {
     Meteor.startup(function() {
 
-      db = new GroundDB('test');
+      db = new Ground.Collection('test');
 
       db.find({}).forEach(function(doc) {
         db.remove({ _id: doc._id });
@@ -56,9 +56,9 @@ GroundTest.add('Test tab syncronisation', function() {
   });
 
   // step 2
-  clientB('Disconnect, Rig GroundDB, findOne doc', function(complete) {
+  clientB('Disconnect, Rig Ground, findOne doc', function(complete) {
     Meteor.disconnect();
-    db = new GroundDB('test');
+    db = new Ground.Collection('test');
 
     var item = db.findOne({});
 

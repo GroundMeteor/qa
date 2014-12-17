@@ -45,7 +45,7 @@ GroundTest.add('Conflict resolution newest doc wins', function() {
   }); 
 
   clientA('Client A creates a document', function(complete) {
-    db = new GroundDB('test', { prefix: 'mac'});
+    db = new Ground.Collection('test', { prefix: 'mac'});
 
     db.insert({ foo: 'new doc' }, function() {
       complete();
@@ -67,7 +67,7 @@ GroundTest.add('Conflict resolution newest doc wins', function() {
   });
 
   clientB('Client B then edits the document', function(complete) {
-    db = new GroundDB('test', { prefix: 'pc'});
+    db = new Ground.Collection('test', { prefix: 'pc'});
 
     var item = db.findOne();
 

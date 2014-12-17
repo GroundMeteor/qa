@@ -17,7 +17,7 @@ GroundTest.add('Does offline clients behave on server updates', function() {
 
 
   TestUtils.sameStep('Init', function(complete) {
-    db = new GroundDB('test');
+    db = new Ground.Collection('test');
 
     complete();
   }, clientA, clientB);

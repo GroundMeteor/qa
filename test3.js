@@ -32,7 +32,7 @@ GroundTest.add('Test common offline insert/update/remove', function() {
 
     Meteor.disconnect();
     
-    db = new GroundDB('test', { prefix: 'clienta.' });
+    db = new Ground.Collection('test', { prefix: 'clienta.' });
 
     if (db.grounddb.storage.prefix() === '_storage.clienta.test.db.') {
       
@@ -100,7 +100,7 @@ GroundTest.add('Test common offline insert/update/remove', function() {
 
   // Step 6
   clientB('Verify created document', function(complete) {
-    db = new GroundDB('test', { prefix: 'clientb' });
+    db = new Ground.Collection('test', { prefix: 'clientb' });
 
     var doc = db.findOne({ test: 1 });
 

@@ -27,7 +27,7 @@ GroundTest.add('Test offline resume actions', function() {
   clientA('Clear localStorage', function(complete) {    
     localStorage.clear();
 
-    db = new GroundDB('test');
+    db = new Ground.Collection('test');
 
     if (db.findOne()) {
       complete('Database is not empty');
@@ -111,9 +111,9 @@ GroundTest.add('Test offline resume actions', function() {
 
 
     var methods = localStorage.getItem('_storage._methods_.db.methods');
-    var actualMethods = JSON.stringify(_getMethodsList());
     
-    if (!methods || methods == '[[false,true,null],[0],[0]]') {
+    if (!methods || methods == '[[],[0],[0]]') {
+      var actualMethods = JSON.stringify(_getMethodsList());
       complete('Outstanding methods are not stored in localstorage! Got: "' + methods + '" - real: "' + actualMethods + '"');
     } else {
       var operationCount = MiniMax.parse(methods).length;
@@ -127,12 +127,16 @@ GroundTest.add('Test offline resume actions', function() {
   });
 
   server('Check clean db', function(complete) {
-    if (db.findOne()) {
-      complete('Database is not empty');
-    } else {
-      complete();
-    }
-    console.log('---------------- TEST 4 - END --------------');
+    Meteor.setTimeout(function() {
+
+      if (db.findOne()) {
+        complete('Database is not empty');
+      } else {
+        complete();
+      }
+      console.log('---------------- TEST 4 - END --------------');
+      
+    }, 1000);
   }); 
 
 });
@@ -143,16 +147,16 @@ GroundTest.add('Test offline resume actions - Verify', function() {
 
   var server = new this.Server();
 
-  clientA('Wait a sec for methods to resume', function(done) {
-    db = new GroundDB('test');
-    Meteor.setTimeout(function() {
-      done();
-    }, 1000);    
+  clientA('Wait a sec for methods to resume', function(complete) {
+    db = new Ground.Collection('test');
+    complete();
   });
 
   server('Init', function(complete) {
     console.log('---------------- TEST 5 - WATCHING DB --------------');
-    complete();
+    Meteor.setTimeout(function() {
+      complete();
+    }, 1000);    
   });
 
   // Step 1
@@ -165,8 +169,7 @@ GroundTest.add('Test offline resume actions - Verify', function() {
 
     var thereIsNoRemainingMethods = function() {
       var methods = localStorage.getItem('_storage._methods_.db.methods');
-
-      return (!methods || methods == '[[false,true,null],[0],[0]]');
+      return (!methods || methods == '[[],[0],[0]]');
     };
 
 

@@ -6,6 +6,24 @@ This file initializes the databases and the test environment
 
 if (Meteor.isServer) {
   
+  // Empty users collection
+  Meteor.users.remove({});
+
+  // Create test users
+  _.each(['a', 'b', 'c', 'd'], function(name) {
+
+    Accounts.createUser({
+      username: name,
+      email: name + '@test.foo',
+      password: '1234',
+      profile: {}
+    });
+
+  });
+
+  var countTestUsers = Meteor.users.find().count();
+  console.log('Created', countTestUsers, 'test users');
+
   db = new Meteor.Collection('test');
 
   db.remove({});
@@ -41,7 +59,6 @@ if (Meteor.isServer) {
 
 } else {
 
-  GroundDB.skipMethods({ 'clientConsoleLog': true });
 }
 
 GroundTest.add('Test environment', function() {
@@ -75,18 +92,18 @@ GroundTest.add('Test environment', function() {
 
   /*
 
-    Do some simple tests of the GroundDB object / global
+    Do some simple tests of the Ground object / global
 
   */
   client('Test client environment', function(complete) {
 
-    if (typeof GroundDB !== 'function') {
+    if (typeof Ground.Collection !== 'function') {
 
-      complete('Global "GroundDB" not a function "' + (typeof GroundDB) + '"');
+      complete('Global "Ground.Collection" not a function "' + (typeof Ground.Collection) + '"');
 
     } else {
 
-      db = new GroundDB('test');
+      db = new Ground.Collection('test');
 
       if (typeof db !== 'undefined') {
         if (db instanceof Meteor.Collection) {

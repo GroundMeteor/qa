@@ -21,7 +21,7 @@ GroundTest.add('Test common online insert/update/remove', function() {
 
   // Step 1
   clientA('Create document on the client', function(complete) {
-    db = new GroundDB('test');
+    db = new Ground.Collection('test');
 
     db.insert({ test: 2, foo: 'test_new_document', bar: 'online' }, function(err, id) {
       if (err) {
@@ -51,7 +51,7 @@ GroundTest.add('Test common online insert/update/remove', function() {
 
   // Step 3
   clientB('Verify created document', function(complete) {
-    db = new GroundDB('test');
+    db = new Ground.Collection('test');
 
     var doc = db.findOne({ test: 2 });
 
