@@ -64,7 +64,9 @@ if (Meteor.isServer) {
 GroundTest.add('Test environment', function() {
 
   // Insert iframe 
-  var client = new this.Client('C');
+  var clientA = new this.Client('A');
+  var clientB = new this.Client('B');
+  var clientC = new this.Client('C');
 
   var server = new this.Server();
 
@@ -95,7 +97,7 @@ GroundTest.add('Test environment', function() {
     Do some simple tests of the Ground object / global
 
   */
-  client('Test client environment', function(complete) {
+  clientA('Test client environment - new Ground.Collection', function(complete) {
 
     if (typeof Ground.Collection !== 'function') {
 
@@ -113,6 +115,46 @@ GroundTest.add('Test environment', function() {
         }
       } else {
         complete('db variable not set');
+      }
+
+    }
+  });
+
+  clientB('Test client environment - new Meteor.Collection', function(complete) {
+
+    if (typeof Meteor.Collection !== 'function') {
+
+      complete('Global "Meteor.Collection" not a function "' + (typeof Meteor.Collection) + '"');
+
+    } else {
+
+      dbFoo = new Meteor.Collection('test');
+
+      try {
+        db = new Ground.Collection(dbFoo);
+        complete();
+      } catch(err) {
+        complete('Ground.Collection fails to use Meteor.Collection');
+      }
+
+    }
+  });
+
+  clientC('Test client environment - new Mongo.Collection', function(complete) {
+
+    if (typeof Mongo.Collection !== 'function') {
+
+      complete('Global "Mongo.Collection" not a function "' + (typeof Mongo.Collection) + '"');
+
+    } else {
+
+      dbFoo = new Mongo.Collection('test');
+
+      try {
+        db = new Ground.Collection(dbFoo);
+        complete();
+      } catch(err) {
+        complete('Ground.Collection fails to use Mongo.Collection');
       }
 
     }
